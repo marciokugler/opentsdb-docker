@@ -1,4 +1,4 @@
-FROM janeczku/alpine-kubernetes:3.2
+FROM alpine
 
 RUN apk --update add \
     rsyslog \
@@ -9,17 +9,17 @@ RUN apk --update add \
   && : adding gnuplot for graphing \
   && apk add gnuplot \
     --update-cache \
-    --repository http://dl-3.alpinelinux.org/alpine/edge/testing/
-
-ENV TSDB_VERSION 2.2.0
-ENV HBASE_VERSION 1.1.3
+    --repository http://dl-cdn.alpinelinux.org/alpine/edge/community/
+	
+ENV TSDB_VERSION 2.3.0
+ENV HBASE_VERSION 1.2.4
 ENV JAVA_HOME /usr/lib/jvm/java-1.7-openjdk
 ENV PATH $PATH:/usr/lib/jvm/java-1.7-openjdk/bin/
 
 RUN mkdir -p /opt/bin/
-
 RUN mkdir /opt/opentsdb/
 WORKDIR /opt/opentsdb/
+
 RUN apk --update add --virtual builddeps \
     build-base \
     autoconf \
@@ -48,26 +48,31 @@ RUN apk --update add --virtual builddeps \
 RUN mkdir -p /data/hbase /root/.profile.d /opt/downloads
 
 WORKDIR /opt/downloads
-RUN wget -O hbase-${HBASE_VERSION}.bin.tar.gz http://archive.apache.org/dist/hbase/1.1.3/hbase-1.1.3-bin.tar.gz && \
+RUN wget -O hbase-${HBASE_VERSION}.bin.tar.gz http://www-eu.apache.org/dist/hbase/stable/hbase-${HBASE_VERSION}-bin.tar.gz && \
     tar xzvf hbase-${HBASE_VERSION}.bin.tar.gz && \
     mv hbase-${HBASE_VERSION} /opt/hbase && \
     rm hbase-${HBASE_VERSION}.bin.tar.gz
 
-ADD docker/hbase-site.xml /opt/hbase/conf/
-ADD docker/start_opentsdb.sh /opt/bin/
-ADD docker/create_tsdb_tables.sh /opt/bin/
-ADD docker/start_hbase.sh /opt/bin/
+ADD docker/hbase-site.xml /opt/hbase/conf/hbase-site.xml
+ADD docker/start_opentsdb.sh /opt/bin/start_opentsdb.sh.bkp
+ADD docker/create_tsdb_tables.sh /opt/bin/create_tsdb_tables.sh.bkp
+ADD docker/start_hbase.sh /opt/bin/start_hbase.sh.bkp
+
+WORKDIR /opt/bin/
+
+#DOS2UNIX CONVERT
+RUN tr -d '\r' < start_hbase.sh.bkp > start_hbase.sh
+RUN tr -d '\r' < start_opentsdb.sh.bkp > start_opentsdb.sh
+RUN tr -d '\r' < /opt/bin/create_tsdb_tables.sh.bkp > /opt/bin/create_tsdb_tables.sh
 
 RUN for i in /opt/bin/start_hbase.sh /opt/bin/start_opentsdb.sh /opt/bin/create_tsdb_tables.sh; \
     do \
         sed -i "s#::JAVA_HOME::#$JAVA_HOME#g; s#::PATH::#$PATH#g; s#::TSDB_VERSION::#$TSDB_VERSION#g;" $i; \
     done
 
-
-RUN mkdir -p /etc/services.d/hbase /etc/services.d/tsdb
-RUN ln -s /opt/bin/start_hbase.sh /etc/services.d/hbase/run
-RUN ln -s /opt/bin/start_opentsdb.sh /etc/services.d/tsdb/run
+RUN chmod -R 775 /opt/bin/*
 
 EXPOSE 60000 60010 60030 4242 16010
 
 VOLUME ["/data/hbase", "/tmp"]
+CMD bash -c "/opt/hbase/bin/start-hbase.sh && /opt/bin/start_opentsdb.sh;"

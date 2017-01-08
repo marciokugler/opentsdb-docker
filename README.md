@@ -1,7 +1,7 @@
 opentsdb-docker
 ===============
-
-Files required to make a trusted opentsdb Docker such that opentsdb can be used for other projects (e.g. scollector, bosun)
+This project is based on https://github.com/PeterGrace/opentsdb-docker with some modifications.
+Files required to make a trusted opentsdb Docker such that opentsdb can be used for other projects
 
 How it works
 ============
