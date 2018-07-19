@@ -1,8 +1,4 @@
 FROM alpine
-RUN sed -i -e 's/dl-cdn/dl-4/' /etc/apk/repositories && \
-    apk add --no-cache \
-        bash \
-        build-base
 	
 RUN apk --update add \
     rsyslog \
@@ -11,9 +7,7 @@ RUN apk --update add \
     make \
     wget \
   && : adding gnuplot for graphing \
-  && apk add gnuplot \
-    --update-cache \
-    --repository http://dl-cdn.alpinelinux.org/alpine/edge/community/
+  && apk add gnuplot
 	
 ENV TSDB_VERSION 2.3.0
 ENV HBASE_VERSION 1.2.4
