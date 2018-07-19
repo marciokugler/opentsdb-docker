@@ -2,7 +2,7 @@ FROM alpine
 RUN sed -i -e 's/dl-cdn/dl-4/' /etc/apk/repositories && \
     apk add --no-cache \
         bash \
-        build-base \
+        build-base
 	
 RUN apk --update add \
     rsyslog \
