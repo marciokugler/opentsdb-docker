@@ -1,6 +1,6 @@
 FROM alpine
 	
-RUN apk --update add \
+RUN apk --update add --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/community/ \
     rsyslog \
     bash \
     openjdk7 \
