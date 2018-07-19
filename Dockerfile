@@ -1,6 +1,6 @@
-FROM alpine
+FROM alpine:3.7
 	
-RUN apk --update add --update-cache --repository http://dl-4.alpinelinux.org/alpine/v3.3/main \
+RUN apk --update add --no-cache \
     rsyslog \
     bash \
     openjdk7 \
