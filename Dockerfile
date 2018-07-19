@@ -1,5 +1,6 @@
 FROM alpine:3.7
-	
+RUN apk add python make g++ --repository http://dl-5.alpinelinux.org/alpine/v3.4/main/ \
+
 RUN apk --update add --no-cache \
     rsyslog \
     bash \
